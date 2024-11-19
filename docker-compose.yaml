@@ -1,0 +1,45 @@
+services:
+  serv1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: serv1
+    ports:
+      - "8082:7601"
+    networks:
+      - reverse-proxy
+    environment:
+      - PORT=7601
+
+  serv2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: serv2
+    ports:
+      - "8083:7602"
+    networks:
+      - reverse-proxy
+    environment:
+      - PORT=7602
+
+  nginx:
+    image: nginx:latest
+    container_name: reverse-proxy
+    ports:
+      - "8081:80"
+    depends_on:
+      - serv1
+      - serv2
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - reverse-proxy
+
+networks:
+  reverse-proxy:
+    driver: bridge
+
+volumes:
+  nginx:
+    driver: local
